@@ -1,0 +1,120 @@
+User-Agent	Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1;
+Trident/6.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR
+3.0.30729; Media Center PC 6.0; .NET4.0C)
+instanceof Object tests
+true
+true
+true
+true
+constructor tests
+true
+true
+true
+true
+instanceof Array tests
+false
+false
+true
+true
+__proto__ and prototype tests
+true
+true
+true
+true
+__proto__.__proto__
+
+
+[object Object]
+[object Object]
+__proto__.__proto__ tests
+true
+true
+true
+true
+true
+true
+constructor name
+obj1.constructor.name:	Object
+obj2.constructor.name:	Object
+obj3.constructor.name:	Array
+obj4.constructor.name:	Array
+# calc
+x1.calc():	200
+x2.calc():	600
+x1.calc === x2.calc:	false
+x1.calc.toString() === x2.calc.toString():	true
+x3.calc():	200
+x4.calc():	600
+x3.calc === x4.calc:	true
+x5.area:	200
+x6.area:	600
+私は Animal の Annie です。
+# a1
+Success: keys = name,introduce
+Success: a1 >> Animal >> Object
+# obj1
+Success: keys = x,y
+Success: obj1 >> Object
+# obj2
+Success: keys = x,y
+Success: obj2 >> Object
+# obj3
+Success: keys = 0,1
+Success: obj3 >> Array >> Object
+# obj4
+Success: keys = 0,1
+Success: obj4 >> Array >> Object
+# x1
+Success: keys = w,h,calc
+Success: x1 >> Object
+# x2
+Success: keys = w,h,calc
+Success: x2 >> Object
+# x3
+Success: keys = w,h,calc
+Success: x3 >> Object
+# x4
+Success: keys = w,h,calc
+Success: x4 >> Object
+# x5
+Success: keys = w,h,area
+Success: x5 >> Object
+# x6
+Success: keys = w,h,area
+Success: x6 >> Object
+# No good example #1
+私は Animal の Pooh です。
+Success: keys = name,introduce
+Error: b1のコンストラクタはAnimalで、Bearではない。
+Error: BearのプロトタイプはAnimalで、Bearではない。
+Error: b1の__proto__はAnimalで、Bearではない。
+Error: b1の__proto__の__proto__はObjectで、Animalではない。
+Error: b1 >> Animal >> Object, Expected: b1 >> Bear >> Animal >> Object
+# No good example #2
+私は Animal の Kitty です。
+Success: keys = name,introduce
+Error: c1のコンストラクタはAnimalで、Catではない。
+Error: CatのプロトタイプはAnimalで、Catではない。
+Error: c1の__proto__はAnimalで、Catではない。
+Error: c1 >> Animal >> Animal >> Object, Expected: c1 >> Cat >> Animal >>
+Object
+# Non-standard-compliant #1
+TypeError: Object doesn't support property or method 'introduce'
+Forget about the way of defining a sublclass like Dog, since Object.__proto__
+is not supported on this browser.
+# Non-standard-compliant #2
+TypeError: Object doesn't support property or method 'introduce'
+Forget about the way of defining a subclass like Elephant, since
+Object.__proto__ is not supported on this browser.
+# No good example #3
+私は Fox の Gon です。
+Error: keys = name,constructor,introduce, Expected: keys = name,introduce
+Success: f1 >> Fox >> Animal >> Object
+# Correct example
+私は Gorilla の Gon です。
+Success: keys = name,introduce
+Success: g1 >> Gorilla >> Animal >> Object
+# Forgotten new trouble
+TypeError: Unable to get property 'introduce' of undefined or null reference
+# Guard for forgotten new
+私は Animal2 の Annie です。

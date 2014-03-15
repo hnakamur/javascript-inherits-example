@@ -6,6 +6,13 @@
 </head>
 <body>
 <p>See console log for output.</p>
+<textarea id="log" cols="80" rows="10"></textarea>
+<script>
+console.log = console.info = console.error = function log() {
+  var el = document.getElementById('log');
+  el.value = el.value + Array.prototype.join.call(arguments, "\t") + "\r";
+}
+</script>
 <script src="examples.js"></script>
 </body>
 </html>

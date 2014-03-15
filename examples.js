@@ -1,3 +1,7 @@
+if (typeof navigator !== 'undefined') {
+  console.log('User-Agent', navigator.userAgent);
+}
+
 if (!Object.prototype.__defineGetter__ && Object.defineProperty) {
   Object.defineProperty(Object.prototype, '__defineGetter__', {
     value: function(name, func) {
@@ -126,6 +130,11 @@ var NORMAL = typeof window !== 'undefined' ? '' : CSI + 'm';
 var GREEN = typeof window !== 'undefined' ? '' : CSI + '32m';
 var RED = typeof window !== 'undefined' ? '' : CSI + '31m';
 var YELLOW = typeof window !== 'undefined' ? '' : CSI + '33m';
+
+//NORMAL = '';
+//GREEN = '';
+//RED = '';
+//YELLOW = '';
 
 function assertTrue(bool, msg) {
   if (!bool) console.error(RED + 'Error: ' + msg + NORMAL);
