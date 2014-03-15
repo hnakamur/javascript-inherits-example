@@ -1,3 +1,39 @@
+if (!Object.prototype.__defineGetter__ && Object.defineProperty) {
+  Object.defineProperty(Object.prototype, '__defineGetter__', {
+    value: function(name, func) {
+      Object.defineProperty(this, name,
+        {get: func, enumerable: true, configurable: true});
+    }, enumerable: false, configurable: true});
+}
+if (!Object.prototype.__defineSetter && Object.defineProperty) {
+  Object.defineProperty(Object.prototype, '__defineSetter__', {
+    value: function(name, func) {
+      Object.defineProperty(this, name,
+        {set: func, enumerable: true, configurable: true});
+    }, enumerable: false, configurable: true});
+}
+if (!('name' in Function.prototype)) {
+  Function.prototype.__defineGetter__('name', function() {
+    return ('' + this).replace(/^\s*function\s*\**\s*([^\(]*)[\S\s]+$/im, '$1');
+  });
+}
+
+// Copied from https://github.com/es-shims/es5-shim/blob/master/es5-sham.js
+// ES5 15.2.3.2
+// http://es5.github.com/#x15.2.3.2
+if (!Object.getPrototypeOf) {
+    // https://github.com/es-shims/es5-shim/issues#issue/2
+    // http://ejohn.org/blog/objectgetprototypeof/
+    // recommended by fschaefer on github
+    Object.getPrototypeOf = function getPrototypeOf(object) {
+        return object.__proto__ || (
+            object.constructor
+                ? object.constructor.prototype
+                : Object.prototype
+        );
+    };
+}
+
 var obj1 = {x: 12, y: "ab"};
 var obj2 = new Object;
 obj2.x = 34;
@@ -25,25 +61,24 @@ console.log(obj3 instanceof Array);
 console.log(obj4 instanceof Array);
 
 console.log('__proto__ and prototype tests');
-console.log(obj1.__proto__ === Object.prototype);
-console.log(obj2.__proto__ === Object.prototype);
-console.log(obj3.__proto__ === Array.prototype);
-console.log(obj4.__proto__ === Array.prototype);
+console.log(Object.getPrototypeOf(obj1) === Object.prototype);
+console.log(Object.getPrototypeOf(obj2) === Object.prototype);
+console.log(Object.getPrototypeOf(obj3) === Array.prototype);
+console.log(Object.getPrototypeOf(obj4) === Array.prototype);
+
+console.log('__proto__.__proto__');
+console.log(Object.getPrototypeOf(Object.getPrototypeOf(obj1)));
+console.log(Object.getPrototypeOf(Object.getPrototypeOf(obj2)));
+console.log(Object.getPrototypeOf(Object.getPrototypeOf(obj3)));
+console.log(Object.getPrototypeOf(Object.getPrototypeOf(obj4)));
 
 console.log('__proto__.__proto__ tests');
-console.log('obj1.__proto__.__proto__', obj1.__proto__.__proto__);
-console.log('obj2.__proto__.__proto__', obj1.__proto__.__proto__);
-console.log('obj3.__proto__.__proto__', obj1.__proto__.__proto__);
-console.log('obj4.__proto__.__proto__', obj1.__proto__.__proto__);
-console.log('obj1.__proto__', obj1.__proto__);
-console.log('Object.prototype', Object.prototype);
-console.log('Object.prototype.__proto__', Object.prototype.__proto__);
-//console.log(obj1.__proto__.__proto__ === null);
-//console.log(obj2.__proto__.__proto__ === null);
-//console.log(obj3.__proto__.__proto__ === Object.prototype);
-//console.log(obj4.__proto__.__proto__ === Object.prototype);
-//console.log(obj3.__proto__.__proto__.__proto__ === null);
-//console.log(obj4.__proto__.__proto__.__proto__ === null);
+console.log(Object.getPrototypeOf(Object.getPrototypeOf(obj1)) === null);
+console.log(Object.getPrototypeOf(Object.getPrototypeOf(obj2)) === null);
+console.log(Object.getPrototypeOf(Object.getPrototypeOf(obj3)) === Object.prototype);
+console.log(Object.getPrototypeOf(Object.getPrototypeOf(obj4)) === Object.prototype);
+console.log(Object.getPrototypeOf(Object.getPrototypeOf(Object.getPrototypeOf(obj3))) === null);
+console.log(Object.getPrototypeOf(Object.getPrototypeOf(Object.getPrototypeOf(obj4))) === null);
 
 console.log('constructor name');
 console.log('obj1.constructor.name:', obj1.constructor.name);
@@ -124,17 +159,17 @@ function verifyClassObject(obj, expected, keysExpected) {
   assertTrue(Class.prototype.constructor === Class,
       Class.name + 'のプロトタイプは' + Class.prototype.constructor.name +
       'で、' + Class.name + 'ではない。');
-  assertTrue(obj.__proto__.constructor === Class,
-      name + 'の__proto__は' + obj.__proto__.constructor.name + 'で、' +
-      Class.name + 'ではない。');
+  assertTrue(Object.getPrototypeOf(obj).constructor === Class,
+      name + 'の__proto__は' + Object.getPrototypeOf(obj).constructor.name +
+      'で、' + Class.name + 'ではない。');
   if (SuperClass) {
     assertTrue(
-        obj.__proto__.__proto__ === SuperClass.prototype &&
-        obj.__proto__.__proto__.constructor === SuperClass &&
-        Class.prototype.__proto__.constructor === SuperClass,
+        Object.getPrototypeOf(Object.getPrototypeOf(obj)) === SuperClass.prototype &&
+        Object.getPrototypeOf(Object.getPrototypeOf(obj)).constructor === SuperClass &&
+        Object.getPrototypeOf(Class.prototype).constructor === SuperClass,
         name + 'の__proto__の__proto__は' +
-        obj.__proto__.__proto__.constructor.name + 'で、' +
-        SuperClass.name + 'ではない。');
+        Object.getPrototypeOf(Object.getPrototypeOf(obj)).constructor.name +
+        'で、' + SuperClass.name + 'ではない。');
   }
 
   var expectedString = expected.map(function (fn) {
@@ -142,7 +177,7 @@ function verifyClassObject(obj, expected, keysExpected) {
   }).join(' >> ');
 
   var ancestors = [name];
-  for (var obj = obj.__proto__; obj; obj = obj.__proto__) {
+  for (var obj = Object.getPrototypeOf(obj); obj; obj = Object.getPrototypeOf(obj)) {
     ancestors.push(obj.constructor.name);
   }
 
@@ -208,8 +243,16 @@ Dog.prototype = {
   __proto__: Animal.prototype
 };
 var d1 = new Dog('Hachi');
-d1.introduce();
-verifyClassObject(d1, ['d1', Dog, Animal, Object], 'name,introduce');
+try {
+  d1.introduce();
+} catch (err) {
+  console.log(RED + err + NORMAL);
+}
+if (Object.__proto__) {
+  verifyClassObject(d1, ['d1', Dog, Animal, Object], 'name,introduce');
+} else {
+  console.error('Forget about the way of defining a sublclass like Dog, since Object.__proto__ is not supported on this browser.');
+}
 
 console.log('# Non-standard-compliant #2');
 function Elephant(name) {
@@ -217,8 +260,16 @@ function Elephant(name) {
 }
 Elephant.prototype.__proto__ = Animal.prototype;
 var e1 = new Elephant('Dumbo');
-e1.introduce();
-verifyClassObject(e1, ['e1', Elephant, Animal, Object], 'name,introduce');
+try {
+  e1.introduce();
+} catch (err) {
+  console.log(RED + err + NORMAL);
+}
+if (Object.__proto__) {
+  verifyClassObject(e1, ['e1', Elephant, Animal, Object], 'name,introduce');
+} else {
+  console.error('Forget about the way of defining a subclass like Elephant, since Object.__proto__ is not supported on this browser.');
+}
 
 console.log('# No good example #3');
 function Fox(name) {
@@ -234,7 +285,9 @@ console.log('# Correct example');
 function Gorilla(name) {
   Animal.call(this, name);
 }
-//console.log(require('util').inherits.toString());
+
+// the definition of inherits() were copied from
+// console.log(require('util').inherits.toString()) on Node.js v0.10.26;
 function inherits(ctor, superCtor) {
   ctor.super_ = superCtor;
   ctor.prototype = Object.create(superCtor.prototype, {
